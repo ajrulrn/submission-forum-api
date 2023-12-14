@@ -105,16 +105,19 @@ describe('GetDetailThreadUseCase', () => {
     expect(comments[0].username).toEqual(expectedDetailThread.comments[0].username);
     expect(comments[0].date.getDate()).toEqual(expectedDetailThread.comments[0].date.getDate());
     expect(comments[0].content).toEqual(expectedDetailThread.comments[0].content);
+    expect(comments[0].isDelete).toEqual(false);
     expect(replies[0].id).toEqual(expectedDetailThread.comments[0].replies[0].id);
     expect(replies[0].username).toEqual(expectedDetailThread.comments[0].replies[0].username);
     expect(replies[0].date.getDate())
       .toEqual(expectedDetailThread.comments[0].replies[0].date.getDate());
     expect(replies[0].content).toEqual(expectedDetailThread.comments[0].replies[0].content);
+    expect(replies[0].isDelete).toEqual(false);
     expect(replies[1].id).toEqual(expectedDetailThread.comments[0].replies[1].id);
     expect(replies[1].username).toEqual(expectedDetailThread.comments[0].replies[1].username);
     expect(replies[1].date.getDate())
       .toEqual(expectedDetailThread.comments[0].replies[1].date.getDate());
     expect(replies[1].content).toEqual(expectedDetailThread.comments[0].replies[1].content);
+    expect(replies[1].isDelete).toEqual(false);
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload);
     expect(mockReplyRepository.getRepliesByCommentId).toBeCalledWith('comment-123');
