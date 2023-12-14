@@ -21,27 +21,39 @@ describe('ReplyRepositoryPostgres', () => {
     await pool.end();
   });
 
-  describe('getRepliesByThreadId function', () => {
+  describe('getRepliesByCommentId function', () => {
     it('should return empty if no have replies', async () => {
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
-      const replies = await replyRepositoryPostgres.getRepliesByThreadId('xxx');
+      const replies = await replyRepositoryPostgres.getRepliesByCommentId('xxx');
 
       expect(replies).toHaveLength(0);
     });
 
     it('should return replies correctly', async () => {
-      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const userPayload = {
+        id: 'user-123',
+        username: 'dicoding',
+      };
+      const replyPayload = {
+        id: 'reply-123',
+        commentId: 'comment-123',
+        content: 'sebuah balasan',
+        userId: userPayload.id,
+      };
+      await UsersTableTestHelper.addUser(userPayload);
       await CommentsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123' });
-      await RepliesTableTestHelper.addReply({ id: 'reply-1', commentId: 'comment-123' });
-      await RepliesTableTestHelper.addReply({ id: 'reply-2', commentId: 'comment-123' });
-      await RepliesTableTestHelper.addReply({ id: 'reply-3', commentId: 'comment-123' });
+      await RepliesTableTestHelper.addReply(replyPayload);
 
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
-      const replies = await replyRepositoryPostgres.getRepliesByThreadId('thread-123');
+      const [reply] = await replyRepositoryPostgres.getRepliesByCommentId('comment-123');
 
-      expect(replies).toHaveLength(3);
+      expect(reply.id).toEqual(replyPayload.id);
+      expect(reply.content).toEqual(replyPayload.content);
+      expect(reply.date.getDate()).toEqual(new Date().getDate());
+      expect(reply.isDelete).toEqual(false);
+      expect(reply.username).toEqual(userPayload.username);
     });
   });
 
@@ -113,7 +125,7 @@ describe('ReplyRepositoryPostgres', () => {
 
       const replies = await RepliesTableTestHelper.findRepliesById(replyId);
       expect(replies).toHaveLength(1);
-      expect(replies[0].isDelete).toEqual(1);
+      expect(replies[0].isDelete).toEqual(true);
     });
   });
 
@@ -146,7 +158,8 @@ describe('ReplyRepositoryPostgres', () => {
       });
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
-      await expect(replyRepositoryPostgres.verifyReplyExists(replyId)).resolves.not.toThrow();
+      await expect(replyRepositoryPostgres.verifyReplyExists(replyId))
+        .resolves.not.toThrow(NotFoundError);
     });
   });
 
@@ -199,7 +212,7 @@ describe('ReplyRepositoryPostgres', () => {
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
       await expect(replyRepositoryPostgres.verifyReplyOwner(replyId, userPayload.id))
-        .resolves.not.toThrow();
+        .resolves.not.toThrow(AuthorizationError);
     });
   });
 });

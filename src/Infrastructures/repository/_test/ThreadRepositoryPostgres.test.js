@@ -2,6 +2,7 @@ const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const CreatedThread = require('../../../Domains/threads/entities/CreatedThread');
+const DetailThread = require('../../../Domains/threads/entities/DetailThread');
 const NewThread = require('../../../Domains/threads/entities/NewThread');
 const pool = require('../../database/postgres/pool');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
@@ -61,26 +62,27 @@ describe('ThreadRepositoryPostgres', () => {
     });
 
     it('should return thread and when thread is found', async () => {
+      const userPayload = {
+        id: 'user-123',
+        username: 'dicoding',
+      };
       const threadPayload = {
         id: 'thread-123',
         title: 'title',
         body: 'body',
-        userId: 'user-123',
-      };
-
-      const userPayload = {
-        id: 'user-123',
-        username: 'dicoding',
+        userId: userPayload.id,
       };
       await UsersTableTestHelper.addUser(userPayload);
       await ThreadsTableTestHelper.addThread(threadPayload);
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
-      const thread = await threadRepositoryPostgres.getThreadById(threadPayload.id);
-      expect(thread.id).toEqual(threadPayload.id);
-      expect(thread.title).toEqual(threadPayload.title);
-      expect(thread.body).toEqual(threadPayload.body);
-      expect(thread.username).toEqual(userPayload.username);
+      const detailThread = await threadRepositoryPostgres.getThreadById(threadPayload.id);
+
+      expect(detailThread.id).toEqual(threadPayload.id);
+      expect(detailThread.title).toEqual(threadPayload.title);
+      expect(detailThread.body).toEqual(threadPayload.body);
+      expect(detailThread.date.getDate()).toEqual(new Date().getDate());
+      expect(detailThread.username).toEqual(userPayload.username);
     });
   });
 

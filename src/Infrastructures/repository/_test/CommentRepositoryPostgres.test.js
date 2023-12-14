@@ -29,17 +29,33 @@ describe('CommentRepositoryPostgres', () => {
     });
 
     it('should return comments correctly', async () => {
-      await UsersTableTestHelper.addUser({ id: 'user-123' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId: 'user-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-1', threadId: 'thread-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-2', threadId: 'thread-123' });
-      await CommentsTableTestHelper.addComment({ id: 'comment-3', threadId: 'thread-123' });
+      const userPayload = {
+        id: 'user-123',
+        username: 'dicoding',
+      };
+      const commentPayload = {
+        id: 'comment-123',
+        threadId: 'thread-123',
+        content: 'sebuah konten',
+        userId: userPayload.id,
+        date: new Date(),
+      };
+      await UsersTableTestHelper.addUser(userPayload);
+      await ThreadsTableTestHelper.addThread({
+        id: commentPayload.threadId,
+        userId: commentPayload.userId,
+      });
+      await CommentsTableTestHelper.addComment(commentPayload);
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-      const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
+      const [comment] = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
 
-      expect(comments).toHaveLength(3);
+      expect(comment.id).toEqual(commentPayload.id);
+      expect(comment.username).toEqual(userPayload.username);
+      expect(comment.date.getDate()).toEqual(commentPayload.date.getDate());
+      expect(comment.isDelete).toEqual(false);
+      expect(comment.content).toEqual(commentPayload.content);
     });
   });
 
@@ -103,7 +119,7 @@ describe('CommentRepositoryPostgres', () => {
 
       const comments = await CommentsTableTestHelper.findCommentsById(commentId);
       expect(comments).toHaveLength(1);
-      expect(comments[0].isDelete).toEqual(1);
+      expect(comments[0].isDelete).toEqual(true);
     });
   });
 
@@ -130,7 +146,7 @@ describe('CommentRepositoryPostgres', () => {
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
       await expect(commentRepositoryPostgres.verifyCommentExists(commentId))
-        .resolves.not.toThrow();
+        .resolves.not.toThrow(NotFoundError);
     });
   });
 
@@ -169,7 +185,7 @@ describe('CommentRepositoryPostgres', () => {
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
       await expect(commentRepositoryPostgres.verifyCommentOwner(commentId, userPayload.id))
-        .resolves.not.toThrow();
+        .resolves.not.toThrow(AuthorizationError);
     });
   });
 });

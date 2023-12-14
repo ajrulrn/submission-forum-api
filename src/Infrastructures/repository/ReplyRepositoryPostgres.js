@@ -2,6 +2,7 @@ const AuthorizationError = require('../../Commons/exceptions/AuthorizationError'
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
 const CreatedReply = require('../../Domains/replies/entities/CreatedReply');
+const DetailReply = require('../../Domains/replies/entities/DetailReply');
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
@@ -10,22 +11,20 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     this._idGenerator = idGenerator;
   }
 
-  async getRepliesByThreadId(threadId) {
+  async getRepliesByCommentId(commentId) {
     const query = {
       text: `
-        SELECT a.id, a."commentId", a.content, a."createdAt" as date, a."isDelete", b.username
+        SELECT a.id, a.content, a."createdAt" as date, a."isDelete", b.username
         FROM replies as a
         JOIN users as b ON b.id = a."userId"
-        JOIN comments as c ON c.id = a."commentId"
-        WHERE c."threadId" = $1
+        WHERE a."commentId" = $1
         ORDER BY a."createdAt" ASC
       `,
-      values: [threadId],
+      values: [commentId],
     };
 
     const result = await this._pool.query(query);
-
-    return result.rows;
+    return result.rows.map((row) => new DetailReply(row));
   }
 
   async addReply(reply) {
@@ -44,7 +43,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
   async deleteReply(id) {
     const query = {
-      text: 'UPDATE replies SET "isDelete" = 1 WHERE id = $1',
+      text: 'UPDATE replies SET "isDelete" = TRUE WHERE id = $1',
       values: [id],
     };
 
