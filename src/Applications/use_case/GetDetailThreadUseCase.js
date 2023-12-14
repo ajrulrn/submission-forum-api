@@ -8,33 +8,11 @@ class GetDetailThreadUseCase {
   async execute(useCasePayload) {
     const thread = await this._threadRepository.getThreadById(useCasePayload);
     const comments = await this._commentRepository.getCommentsByThreadId(useCasePayload);
-    const replies = await this._replyRepository.getRepliesByThreadId(useCasePayload);
 
-    const mappedComments = comments.map((comment) => {
-      if (comment.isDelete) {
-        comment.content = '**komentar telah dihapus**';
-      }
-      delete comment.isDelete;
-      return comment;
-    });
-
-    const mappedReplies = replies.map((reply) => {
-      if (reply.isDelete) {
-        reply.content = '**balasan telah dihapus**';
-      }
-      delete reply.isDelete;
-      return reply;
-    });
-
-    for (const comment of mappedComments) {
-      comment.replies = [];
-      for (const reply of mappedReplies) {
-        if (comment.id === reply.commentId) {
-          comment.replies.push(reply);
-        }
-        delete reply.commentId;
-      }
-    }
+    const mappedComments = await Promise.all(comments.map(async (comment) => {
+      const replies = await this._replyRepository.getRepliesByCommentId(comment.id);
+      return { ...comment, replies };
+    }));
 
     thread.comments = mappedComments;
 
