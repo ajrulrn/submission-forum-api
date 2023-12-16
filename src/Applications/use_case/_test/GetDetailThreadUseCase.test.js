@@ -14,14 +14,14 @@ describe('GetDetailThreadUseCase', () => {
       title: 'title',
       body: 'body',
       username: 'dicoding',
-      date: new Date(),
+      date: new Date('2023-12-16T09:30:00'),
     });
 
     const mockComments = [
       new DetailComment({
         id: 'comment-123',
         username: 'dicoding',
-        date: new Date(),
+        date: new Date('2023-12-16T09:30:00'),
         content: 'komen pertama',
         isDelete: false,
       }),
@@ -32,50 +32,55 @@ describe('GetDetailThreadUseCase', () => {
         id: 'reply-1',
         username: 'dicoding',
         content: 'balasan pertama',
-        date: new Date(),
+        date: new Date('2023-12-16T09:30:00'),
         isDelete: false,
       }),
       new DetailReply({
         id: 'reply-2',
         username: 'dicoding',
         content: 'balasan kedua',
-        date: new Date(),
+        date: new Date('2023-12-16T09:30:00'),
         isDelete: false,
       }),
     ];
 
-    const expectedDetailThread = {
+    const expectedDetailThread = new DetailThread({
       id: useCasePayload,
       title: 'title',
       body: 'body',
       username: 'dicoding',
-      date: new Date(),
-      comments: [
-        {
-          id: 'comment-123',
-          username: 'dicoding',
-          date: new Date(),
-          content: 'komen pertama',
-          isDelete: false,
-          replies: [
-            {
-              id: 'reply-1',
-              username: 'dicoding',
-              content: 'balasan pertama',
-              date: new Date(),
-              isDelete: false,
-            },
-            {
-              id: 'reply-2',
-              username: 'dicoding',
-              content: 'balasan kedua',
-              date: new Date(),
-              isDelete: false,
-            },
-          ],
-        },
-      ],
-    };
+      date: new Date('2023-12-16T09:30:00'),
+    });
+
+    const expectedComments = [
+      {
+        id: 'comment-123',
+        username: 'dicoding',
+        date: new Date('2023-12-16T09:30:00'),
+        content: 'komen pertama',
+        isDelete: false,
+      },
+    ];
+
+    const expectedReplies = [
+      new DetailReply({
+        id: 'reply-1',
+        username: 'dicoding',
+        content: 'balasan pertama',
+        date: new Date('2023-12-16T09:30:00'),
+        isDelete: false,
+      }),
+      new DetailReply({
+        id: 'reply-2',
+        username: 'dicoding',
+        content: 'balasan kedua',
+        date: new Date('2023-12-16T09:30:00'),
+        isDelete: false,
+      }),
+    ];
+
+    expectedDetailThread.comments = expectedComments;
+    expectedDetailThread.comments[0].replies = expectedReplies;
 
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
@@ -96,31 +101,7 @@ describe('GetDetailThreadUseCase', () => {
 
     const detailThread = await getDetailThreadUseCase.execute(useCasePayload);
 
-    const { comments } = detailThread;
-    const { replies } = comments[0];
-
-    expect(detailThread.id).toEqual(expectedDetailThread.id);
-    expect(detailThread.title).toEqual(expectedDetailThread.title);
-    expect(detailThread.body).toEqual(expectedDetailThread.body);
-    expect(detailThread.username).toEqual(expectedDetailThread.username);
-    expect(detailThread.date.getDate()).toEqual(expectedDetailThread.date.getDate());
-    expect(comments[0].id).toEqual(expectedDetailThread.comments[0].id);
-    expect(comments[0].username).toEqual(expectedDetailThread.comments[0].username);
-    expect(comments[0].date.getDate()).toEqual(expectedDetailThread.comments[0].date.getDate());
-    expect(comments[0].content).toEqual(expectedDetailThread.comments[0].content);
-    expect(comments[0].isDelete).toEqual(expectedDetailThread.comments[0].isDelete);
-    expect(replies[0].id).toEqual(expectedDetailThread.comments[0].replies[0].id);
-    expect(replies[0].username).toEqual(expectedDetailThread.comments[0].replies[0].username);
-    expect(replies[0].date.getDate())
-      .toEqual(expectedDetailThread.comments[0].replies[0].date.getDate());
-    expect(replies[0].content).toEqual(expectedDetailThread.comments[0].replies[0].content);
-    expect(replies[0].isDelete).toEqual(expectedDetailThread.comments[0].replies[0].isDelete);
-    expect(replies[1].id).toEqual(expectedDetailThread.comments[0].replies[1].id);
-    expect(replies[1].username).toEqual(expectedDetailThread.comments[0].replies[1].username);
-    expect(replies[1].date.getDate())
-      .toEqual(expectedDetailThread.comments[0].replies[1].date.getDate());
-    expect(replies[1].content).toEqual(expectedDetailThread.comments[0].replies[1].content);
-    expect(replies[1].isDelete).toEqual(expectedDetailThread.comments[0].replies[1].isDelete);
+    expect(detailThread).toStrictEqual(expectedDetailThread);
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload);
     expect(mockReplyRepository.getRepliesByCommentId).toBeCalledWith('comment-123');
