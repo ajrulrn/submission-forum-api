@@ -78,6 +78,39 @@ class CommentRepositoryPostgres extends CommentRepository {
       throw new NotFoundError('comment not found');
     }
   }
+
+  async isLikedComment(id, userId) {
+    const query = {
+      text: 'SELECT id FROM comment_likes WHERE "commentId" = $1 AND "userId" = $2',
+      values: [id, userId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async likeComment(id, userId) {
+    const query = {
+      text: 'INSERT INTO comment_likes ("commentId", "userId") VALUES($1, $2)',
+      values: [id, userId],
+    };
+
+    await this._pool.query(query);
+  }
+
+  async unlikeComment(id, userId) {
+    const query = {
+      text: 'DELETE FROM comment_likes WHERE "commentId" = $1 AND "userId" = $2',
+      values: [id, userId],
+    };
+
+    await this._pool.query(query);
+  }
 }
 
 module.exports = CommentRepositoryPostgres;
