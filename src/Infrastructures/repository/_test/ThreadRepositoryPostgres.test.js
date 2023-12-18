@@ -71,18 +71,22 @@ describe('ThreadRepositoryPostgres', () => {
         title: 'title',
         body: 'body',
         userId: userPayload.id,
+        date: new Date('2023-12-18T07:42:00'),
       };
+      const expectedThread = new DetailThread({
+        id: 'thread-123',
+        title: 'title',
+        body: 'body',
+        username: 'dicoding',
+        date: new Date('2023-12-18T07:42:00'),
+      });
       await UsersTableTestHelper.addUser(userPayload);
       await ThreadsTableTestHelper.addThread(threadPayload);
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
       const detailThread = await threadRepositoryPostgres.getThreadById(threadPayload.id);
 
-      expect(detailThread.id).toEqual(threadPayload.id);
-      expect(detailThread.title).toEqual(threadPayload.title);
-      expect(detailThread.body).toEqual(threadPayload.body);
-      expect(detailThread.date.getDate()).toEqual(new Date().getDate());
-      expect(detailThread.username).toEqual(userPayload.username);
+      expect(detailThread).toStrictEqual(expectedThread);
     });
   });
 
