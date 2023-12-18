@@ -111,6 +111,17 @@ class CommentRepositoryPostgres extends CommentRepository {
 
     await this._pool.query(query);
   }
+
+  async countLikesByCommentId(commentId) {
+    const query = {
+      text: 'SELECT id FROM comment_likes WHERE "commentId" = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rowCount;
+  }
 }
 
 module.exports = CommentRepositoryPostgres;

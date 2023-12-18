@@ -8,6 +8,7 @@ class CommentsHandler {
 
     this.postCommentHandler = this.postCommentHandler.bind(this);
     this.deleteCommentHandler = this.deleteCommentHandler.bind(this);
+    this.putLikeCommentHandler = this.putLikeCommentHandler.bind(this);
   }
 
   async postCommentHandler(request, h) {
@@ -42,7 +43,7 @@ class CommentsHandler {
 
   async putLikeCommentHandler(request, h) {
     const likeCommentUseCase = this._container.getInstance(LikeCommentUseCase.name);
-    const { id: userId } = request.auth.credentials;
+    const userId = request.auth.credentials.id;
     const { threadId, commentId } = request.params;
     await likeCommentUseCase.execute({ threadId, commentId, userId });
 

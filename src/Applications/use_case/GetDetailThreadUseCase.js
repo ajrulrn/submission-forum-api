@@ -11,7 +11,8 @@ class GetDetailThreadUseCase {
 
     const mappedComments = await Promise.all(comments.map(async (comment) => {
       const replies = await this._replyRepository.getRepliesByCommentId(comment.id);
-      return { ...comment, replies };
+      const likeCount = await this._commentRepository.countLikesByCommentId(comment.id);
+      return { ...comment, replies, likeCount };
     }));
 
     thread.comments = mappedComments;

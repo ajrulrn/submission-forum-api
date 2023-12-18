@@ -27,7 +27,8 @@ describe('LikeCommentUseCase', () => {
     await expect(likeCommentUseCase.execute(useCasePayload)).resolves.not.toThrow();
     expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.verifyCommentExists).toBeCalledWith(useCasePayload.commentId);
-    expect(mockCommentRepository.isLikedComment).toBeCalledWith(useCasePayload.commentId);
+    expect(mockCommentRepository.isLikedComment)
+      .toBeCalledWith(useCasePayload.commentId, useCasePayload.userId);
     expect(mockCommentRepository.likeComment)
       .toBeCalledWith(useCasePayload.commentId, useCasePayload.userId);
     expect(mockCommentRepository.unlikeComment).not.toBeCalled();
@@ -57,7 +58,8 @@ describe('LikeCommentUseCase', () => {
     await expect(likeCommentUseCase.execute(useCasePayload)).resolves.not.toThrow();
     expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.verifyCommentExists).toBeCalledWith(useCasePayload.commentId);
-    expect(mockCommentRepository.isLikedComment).toBeCalledWith(useCasePayload.commentId);
+    expect(mockCommentRepository.isLikedComment)
+      .toBeCalledWith(useCasePayload.commentId, useCasePayload.userId);
     expect(mockCommentRepository.likeComment).not.toBeCalledWith();
     expect(mockCommentRepository.unlikeComment)
       .toBeCalledWith(useCasePayload.commentId, useCasePayload.userId);
