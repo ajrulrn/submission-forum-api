@@ -9,7 +9,7 @@ class LikeCommentUseCase {
 
     await this._threadRepository.verifyThreadExists(threadId);
     await this._commentRepository.verifyCommentExists(commentId);
-    const isLikedComment = await this._commentRepository.isLikedComment(commentId);
+    const isLikedComment = await this._commentRepository.isLikedComment(commentId, userId);
     if (isLikedComment) {
       await this._commentRepository.unlikeComment(commentId, userId);
     } else {

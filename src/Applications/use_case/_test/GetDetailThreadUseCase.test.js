@@ -59,6 +59,7 @@ describe('GetDetailThreadUseCase', () => {
         date: new Date('2023-12-16T09:30:00'),
         content: 'komen pertama',
         isDelete: false,
+        likeCount: 1,
       },
     ];
 
@@ -86,12 +87,10 @@ describe('GetDetailThreadUseCase', () => {
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
 
-    mockThreadRepository.getThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve(mockThread));
-    mockCommentRepository.getCommentsByThreadId = jest.fn()
-      .mockImplementation(() => Promise.resolve(mockComments));
-    mockReplyRepository.getRepliesByCommentId = jest.fn()
-      .mockImplementation(() => Promise.resolve(mockReplies));
+    mockThreadRepository.getThreadById = jest.fn(() => Promise.resolve(mockThread));
+    mockCommentRepository.getCommentsByThreadId = jest.fn(() => Promise.resolve(mockComments));
+    mockReplyRepository.getRepliesByCommentId = jest.fn(() => Promise.resolve(mockReplies));
+    mockCommentRepository.countLikesByCommentId = jest.fn(() => Promise.resolve(1));
 
     const getDetailThreadUseCase = new GetDetailThreadUseCase({
       threadRepository: mockThreadRepository,

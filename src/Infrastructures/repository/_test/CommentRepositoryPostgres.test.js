@@ -281,4 +281,37 @@ describe('CommentRepositoryPostgres', () => {
       expect(commentLike).toHaveLength(0);
     });
   });
+
+  describe('countLikesByCommentId function', () => {
+    it('should persist count like comment', async () => {
+      const payload = {
+        userId: 'user-123',
+        threadId: 'thread-123',
+        commentId: 'comment-123',
+      };
+      await UsersTableTestHelper.addUser({ id: payload.userId });
+      await ThreadsTableTestHelper.addThread({
+        threadId: payload.threadId,
+        userId: payload.userId,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: payload.commentId,
+        threadId: payload.threadId,
+        userId: payload.userId,
+      });
+      await CommentLikesTableTestHelper.likeComment({
+        commentId: payload.commentId,
+        userId: payload.userId,
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      const likeComment = await commentRepositoryPostgres.countLikesByCommentId(
+        payload.commentId,
+        payload.userId,
+      );
+
+      expect(likeComment).toEqual(1);
+    });
+  });
 });
